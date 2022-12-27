@@ -17,10 +17,10 @@ model_fit = model.fit()
 # print(model_fit.summary())
 # fore = model_fit.get_forecast()
 print(model_fit.predict())
-# with open('arima.txt', 'w') as f:
-#     for p in range(20):
-#         for d in range(1, 3):
-#             for q in range(20):
-#                 model = ARIMA(series, order=(p, d, q))
-#                 model_fit = model.fit()
-#                 f.write(str(model_fit.summary()))
+with open('arima.txt', 'w') as f:
+    for p in range(20):
+        for d in range(1, 3):
+            for q in range(20):
+                model = ARIMA(series, order=(p, d, q))
+                model_fit = model.fit()
+                f.write(str(model_fit.summary()))
