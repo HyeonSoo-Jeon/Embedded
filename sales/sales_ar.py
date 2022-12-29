@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 
 
-series = pd.read_csv('./sales.csv', header=0, index_col=0)
+series = pd.read_csv('./sales/sales.csv', header=0, index_col=0)
 # series['Sales_diff'] = series['Sales'].shift(periods=-1)
 # series["Sales_diff"] = series['Sales'].diff(1)
 # print(series)

@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 
 
-series = pd.read_csv('./kospi.csv', header=0, index_col=0)
+series = pd.read_csv('./KOSPI/kospi.csv', header=0, index_col=0)
 
 
 # plot_acf(series)

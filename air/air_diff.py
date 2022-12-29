@@ -1,4 +1,4 @@
-# 이산화 질소 월별 대기 오염도
+# 이산화 질소 월별 대기 오염호
 
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from statsmodels.tsa.stattools import adfuller
@@ -9,19 +9,31 @@ import numpy as np
 
 series = pd.read_csv('./air/air.csv', header=0, index_col=0)  # 142개
 
+plot_acf(series)
+plot_pacf(series)
 
-model = ARIMA(series[:100], order=(2, 1, 2))
-model_fit = model.fit()
-print(series)
-print(model_fit.predict())
+series_diff1 = series.diff().dropna()
+series_diff2 = series.diff().diff().dropna()
 
-series.plot()
-plt.axvline(x=100, color='gray', linestyle='--')
-model_fit.predict(end=142).plot(label='predict')
-plt.legend()
+# series_diff1.plot()
+# series_diff2.plot()
+
+# model = ARIMA(series[:100], order=(0, 2, 1))
+# model_fit = model.fit()
+# print(series)
+# print(model_fit.predict())
+
+# series.plot()
+# plt.axvline(x=100, color='gray', linestyle='--')
+# model_fit.predict(end=142).plot()
 plt.show()
 
-print(model_fit.summary())
+# model = ARIMA(series[:100], order=(1, 2, 1))
+# print(model.fit().bic)
+# model = ARIMA(series[:100], order=(3, 2, 1))
+# print(model.fit().bic)
+# model = ARIMA(series[:100], order=(0, 2, 1))
+# print(model.fit().bic)
 
 # print(model_fit.summary())
 

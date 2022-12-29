@@ -5,28 +5,29 @@ import matplotlib.pyplot as plt
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 
 
-series = pd.read_csv('./sales.csv', header=0, index_col=0)
+series = pd.read_csv('./sales/sales.csv', header=0, index_col=0)
 # series['Sales_diff'] = series['Sales'].shift(periods=-1)
 # series["Sales_diff"] = series['Sales'].diff(1)
 # print(series)
 # plot_acf(series['Sales_diff'])
 
-plot_acf(series)
-series.plot()
+# plot_acf(series)
+# plot_pacf(series)
+# series.plot()
 
-print(adfuller(series))
+# print(adfuller(series))
 # plot_pacf(series)
 
 # plt.show()
 
-model = ARIMA(series[:30], order=(1, 2, 2))
-model_fit = model.fit()
+# model = ARIMA(series[:30], order=(1, 2, 2))
+# model_fit = model.fit()
 # print(model_fit.summary())
 # print(model_fit.arparams)
-plt.axvline(x=30, color='gray', linestyle='--')
-model_fit.predict(end=40).plot()
-plt.show()
-print(adfuller(model_fit.predict()))
+# plt.axvline(x=30, color='gray', linestyle='--')
+# model_fit.predict(end=40).plot()
+# plt.show()
+# print(adfuller(model_fit.predict()))
 
 # print(model_fit.)
 
