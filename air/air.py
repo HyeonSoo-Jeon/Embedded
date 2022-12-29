@@ -6,40 +6,29 @@ from statsmodels.tsa.arima.model import ARIMA
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+from pmdarima import auto_arima
+from sklearn.metrics import mean_squared_error
 
 series = pd.read_csv('./air/air.csv', header=0, index_col=0)  # 142개
 
+# plot_acf(series[:100])
+# plot_pacf(series[:100])
 
-model = ARIMA(series[:100], order=(2, 1, 2))
-model_fit = model.fit()
-print(series)
-print(model_fit.predict())
+# series_diff1 = series[:100].diff().dropna()
+# series_diff2 = series[:100].diff().diff().dropna()
+# series_diff1.plot()
+# series_diff2.plot()
+
+model2 = ARIMA(series[:125], order=(0, 1, 0))
+model_fit2 = model2.fit()
 
 series.plot()
-plt.axvline(x=100, color='gray', linestyle='--')
-model_fit.predict(end=142).plot(label='predict')
+plt.axvline(x=125, color='gray', linestyle='--')
+model_fit2.predict(end=142).plot(label='predict')
 plt.legend()
 plt.show()
 
-print(model_fit.summary())
 
-# print(model_fit.summary())
-
-
-# model2 = ARIMA(series[:100], order=(1, 2, 1), seasonal_order=(1, 1, 1, 2))
-# model2_fit = model2.fit()
-# model2_fit.predict(end=142).plot()
-
-# minAIC = float('inf')
-# pdq = [0, 0, 0]
-
-# with open('air.txt', 'w') as f:
-#     for p in range(5):
-#         for d in range(1, 4):
-#             for q in range(5):
-#                 AIC = ARIMA(series[:100], order=(p, d, q)).fit().aic
-#                 f.write(f'[{p}, {d}, {q}] : {AIC}\n')
-#                 if abs(AIC) < minAIC:
-#                     pdq = [p, d, q]
-
-# print(pdq)
+# opt = auto_arima(series[:125], seasonal=False, d=2,
+#                  trace=True, information_criterion='bic')
+# print(opt.summary())

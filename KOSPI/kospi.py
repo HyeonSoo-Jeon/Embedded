@@ -7,23 +7,23 @@ import numpy as np
 
 series = pd.read_csv('./KOSPI/kospi.csv', header=0, index_col=0)
 
-plot_acf(series)
-plot_pacf(series)
+# plot_acf(series)
+# plot_pacf(series)
 # series_dif1 = series.diff().dropna()
 # series_dif2 = series.diff().diff().dropna()
 
 # series_dif1.plot()
 # series_dif2.plot()
 
-plt.show()
 # series.plot()
-# model = ARIMA(series[:600], order=(1, 2, 0))
-# model_fit = model.fit()
+model = ARIMA(series[:600], order=(0, 1, 0))
+model_fit = model.fit()
 
-# model_fit.predict(end=721).plot()
-# plt.axvline(x=600, color='gray', linestyle='--')
-# plt.show()
-# print(model_fit.summary())
+series.plot()
+model_fit.predict(end=721).plot(label='Predictions')
+plt.axvline(x=600, color='gray', linestyle='--')
+plt.legend()
+plt.show()
 
 # print(model_fit.predict())
 # print(model_fit.forecast())

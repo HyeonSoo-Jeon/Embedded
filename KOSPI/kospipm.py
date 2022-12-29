@@ -8,16 +8,19 @@ from pmdarima import auto_arima
 
 series = pd.read_csv('./KOSPI/kospi.csv', header=0, index_col=0)
 
-# opt = auto_arima(series, seasonal=False, trace=True,
+# opt = auto_arima(series, seasonal=False, trace=True, d=1,
+#                  information_criterion='bic')
+# print(opt.summary())
+# opt = auto_arima(series, seasonal=False, trace=True, d=2,
 #                  information_criterion='bic')
 # print(opt.summary())
 
 series.plot()
 
-model = ARIMA(series[:600], order=(0, 0, 0), seasonal_order=(1, 2, 1, 12))
+model = ARIMA(series[:600], order=(0, 1, 0))
 model_fit = model.fit()
 
-model_fit.predict(end=721).plot()
+model_fit.predict(end=721).plot(label='Predictions')
 plt.axvline(x=600, color='gray', linestyle='--')
 
 plt.show()

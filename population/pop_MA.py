@@ -10,46 +10,46 @@ import numpy as np
 series = pd.read_csv('./population/uspop.csv', header=0, index_col=0)  # 142개
 
 
-# model1 = ARIMA(series, order=(0, 0, 8))
-# model_fit1 = model1.fit()
-# model2 = ARIMA(series, order=(0, 0, ))
-# model_fit2 = model2.fit()
-# model3 = ARIMA(series, order=(0, 0, 18))
-# model_fit3 = model3.fit()
+model1 = ARIMA(series, order=(0, 0, 1))
+model_fit1 = model1.fit()
+model2 = ARIMA(series, order=(0, 0, 2))
+model_fit2 = model2.fit()
+model3 = ARIMA(series, order=(0, 0, 8))
+model_fit3 = model3.fit()
 
 
-# series.plot()
-# model_fit1.predict().plot(label="MR(1) Predictions")
-# model_fit2.predict().plot(label="MR(2) Predictions")
-# model_fit3.predict().plot(label="Optima MR Predictions by AIC, BIC, HQIC")
-# plt.legend()
-# plt.show()
+series.plot()
+model_fit1.predict().plot(label="MR(1) Predictions")
+model_fit2.predict().plot(label="MR(2) Predictions")
+model_fit3.predict().plot(label="Optima MR Predictions by AIC, BIC, HQIC")
+plt.legend()
+plt.show()
 
-minAIC = float('inf')
-aicPDQ = -1
-minBIC = float('inf')
-bicPDQ = -1
-minHI = float('inf')
-HIPDQ = -1
+# minAIC = float('inf')
+# aicPDQ = -1
+# minBIC = float('inf')
+# bicPDQ = -1
+# minHI = float('inf')
+# HIPDQ = -1
 
-for i in range(1, 10):
-    model = ARIMA(series, order=(0, 0, i))
-    model_fit = model.fit()
-    aic = model_fit.aic
-    bic = model_fit.bic
-    hi = model_fit.hqic
+# for i in range(1, 10):
+#     model = ARIMA(series, order=(0, 0, i))
+#     model_fit = model.fit()
+#     aic = model_fit.aic
+#     bic = model_fit.bic
+#     hi = model_fit.hqic
 
-    if minAIC > aic:
-        minAIC = aic
-        aicPDQ = i
+#     if minAIC > aic:
+#         minAIC = aic
+#         aicPDQ = i
 
-    if minBIC > bic:
-        minBIC = bic
-        bicPDQ = i
+#     if minBIC > bic:
+#         minBIC = bic
+#         bicPDQ = i
 
-    if minHI > hi:
-        minHI = hi
-        HIPDQ = i
+#     if minHI > hi:
+#         minHI = hi
+#         HIPDQ = i
 
-print(
-    f"AIC : {minAIC}, {aicPDQ}\nBIC : {minBIC}, {bicPDQ}\nHQIC : {minHI}, {HIPDQ}")
+# print(
+#     f"AIC : {minAIC}, {aicPDQ}\nBIC : {minBIC}, {bicPDQ}\nHQIC : {minHI}, {HIPDQ}")

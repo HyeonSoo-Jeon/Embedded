@@ -11,28 +11,23 @@ from sklearn.metrics import mean_squared_error
 
 series = pd.read_csv('./air/air.csv', header=0, index_col=0)  # 142개
 
-# opt = auto_arima(series, seasonal=True, m=12,
-#                  trace=True, information_criterion='bic')
-# print(opt.summary())
+opt = auto_arima(series[:125], seasonal=True, m=12,
+                 trace=True, information_criterion='bic')
+print(opt.summary())
 # 내생각 (1,1,1)(1,1,1,12)
 # best (2,1,2)(2,0,1,12)
-model1 = ARIMA(series[:100], order=(1, 1, 1), seasonal_order=(1, 1, 1, 12))
+model1 = ARIMA(series[:125], order=(1, 1, 0), seasonal_order=(2, 0, 0, 12))
 model_fit1 = model1.fit()
-model2 = ARIMA(series[:100], order=(2, 1, 2), seasonal_order=(2, 0, 1, 12))
-model_fit2 = model2.fit()
-# print(series)
-# print(model_fit.predict())
-
 series.plot()
-plt.axvline(x=100, color='gray', linestyle='--')
-model_fit1.predict(end=142).plot()
-model_fit2.predict(end=142).plot()
+plt.axvline(x=125, color='gray', linestyle='--')
+model_fit1.predict(end=142).plot(label='Predictions')
+plt.legend()
 plt.show()
 
-mse1 = mean_squared_error(series[:100], model_fit1.predict())
-mse2 = mean_squared_error(series[:100], model_fit2.predict())
-print(mse1)
-print(mse2)
+# mse1 = mean_squared_error(series[:100], model_fit1.predict())
+# mse2 = mean_squared_error(series[:100], model_fit2.predict())
+# print(mse1)
+# print(mse2)
 
 # print(model_fit.summary())
 
