@@ -1,30 +1,36 @@
 from statsmodels.tsa.arima.model import ARIMA
+from statsmodels.tsa.stattools import adfuller
 import pandas as pd
 import matplotlib.pyplot as plt
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+import numpy as np
 
 
 series = pd.read_csv('./sales.csv', header=0, index_col=0)
-# series['Sales_diff'] = series['Sales'].shift(periods=-1)
-# series["Sales_diff"] = series['Sales'].diff(1)
-# print(series)
-# plot_acf(series['Sales_diff'])
 
-plot_acf(series)
-series.plot()
+print(adfuller(series, autolag='AIC'))
 
+log_series = np.log(series)
+print(adfuller(log_series, autolag='AIC'))
+
+df_series = log_series.diff(1).diff(1)
+# print(df_series)
+print(adfuller(df_series[2:]))
+df_series.plot()
+
+
+# df_series.plot()
+
+# model = ARIMA(series, order=(0, 1, 0))
+model = ARIMA(log_series, order=(1, 2, 1))
+model_fit = model.fit()
+print(adfuller(model_fit.predict()))
+model_fit.predict().plot()
+# plt.show()
 
 # plot_pacf(series)
 
 # plt.show()
-
-model = ARIMA(series[:30], order=(1, 2, 2))
-model_fit = model.fit()
-# print(model_fit.summary())
-# print(model_fit.arparams)
-plt.axvline(x=30, color='gray', linestyle='--')
-model_fit.predict(end=40).plot()
-plt.show()
 # print(model_fit.)
 
 # print('\n[predict & forecast]')
