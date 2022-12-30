@@ -7,20 +7,21 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-series = pd.read_csv('./population/uspop.csv', header=0, index_col=0)  # 142개
+series = pd.read_csv('./Seminar1/population/uspop.csv',
+                     header=0, index_col=0)  # 142개
 
 
 model1 = ARIMA(series, order=(0, 0, 1))
 model_fit1 = model1.fit()
 model2 = ARIMA(series, order=(0, 0, 2))
 model_fit2 = model2.fit()
-model3 = ARIMA(series, order=(0, 0, 8))
+model3 = ARIMA(series, order=(0, 0, 9))
 model_fit3 = model3.fit()
 
 
 series.plot()
-model_fit1.predict().plot(label="MR(1) Predictions")
-model_fit2.predict().plot(label="MR(2) Predictions")
+model_fit1.predict().plot(label="MA(1) Predictions")
+model_fit2.predict().plot(label="MA(2) Predictions")
 model_fit3.predict().plot(label="Optima MR Predictions by AIC, BIC, HQIC")
 plt.legend()
 plt.show()
