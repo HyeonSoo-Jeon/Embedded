@@ -10,10 +10,15 @@ import numpy as np
 from pmdarima import auto_arima
 from sklearn.metrics import mean_squared_error
 
+
 series = pd.read_csv('./Seminar2/Ecopop/ecopop.csv',
+                     parse_dates=['Date'],
                      header=0, index_col=0)  # 282개
-ax = plt.axes()
-print(len(series))
 series.plot()
-ax.xaxis.set_major_locator(ticker.MultipleLocator(5))
 plt.show()
+# ax = plt.axes()
+# print(len(series))
+# series.plot()
+# ax.xaxis.set_major_locator(ticker.MultipleLocator(5))
+# plt.show()
+# series['Date'] = pd.to_datetime(series['Date'])
