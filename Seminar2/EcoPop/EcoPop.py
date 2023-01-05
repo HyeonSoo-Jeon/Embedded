@@ -15,27 +15,31 @@ warnings.filterwarnings("ignore")
 series = pd.read_csv('./Seminar2/Ecopop/ecopop.csv',
                      parse_dates=['Date'],
                      header=0, index_col=0)  # 282개
-# series.diff().dropna().plot()
-# print(series.iloc[199])
-print(series[:200].mean())
+
+# print(series[:200].mean())
 # 24406
-model1 = ARIMA(series[:200], order=(0, 0, 1))
+model1 = ARIMA(series[:200], order=(1, 0, 1))
 model_fit1 = model1.fit()
-# print(model_fit1.summary())
-# model2 = ARIMA(series[:200], order=(2, 0, 0))
+# model2 = ARIMA(series[:200], order=(1, 1, 1))
 # model_fit2 = model2.fit()
 # model3 = ARIMA(series[:200], order=(2, 1, 0))
 # model_fit3 = model3.fit()
 
+
+# MSE1 = mean_squared_error(series[2:200], model_fit1.predict(start=2))
+# MSE2 = mean_squared_error(series[2:200], model_fit2.predict(start=2))
+# print(f'MSE of ARIMA(1, 0, 0) : {MSE1}')
+# print(f'MSE of ARIMA(2, 0, 0) : {MSE2}')
+
+
 series.plot()
-model_fit1.predict(start=1, end=282).plot(label='0')
-# model_fit2.predict(start=10, end=282).plot(label='1')
-# model_fit3.predict(start=10, end=282).plot(label='2')
+model_fit1.predict(start=2, end=282).plot(label='ARIMA(1, 0, 1)')
+# model_fit2.predict(start=1, end=282).plot(label='ARIMA(2, 0, 0)')
+# # model_fit3.predict(start=10, end=282).plot(label='2')
 plt.axvline(x='2016-01-01', color='gray', linestyle='--')
 plt.title('Monthly economically active population (99.06 ~ 22.11)')
 plt.legend()
 plt.show()
 
-# print(model_fit1.predict(end=282)[199:202])
-# print(model_fit2.predict(end=282)[199:203])
-# print(model_fit3.predict(end=282)[199:204])
+# print(model_fit1.bic)
+# print(model_fit2.bic)

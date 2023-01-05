@@ -15,11 +15,8 @@ warnings.filterwarnings("ignore")
 
 
 series = pd.read_csv('./Seminar2/KOSPI/KOSPI.csv',
-                     parse_dates=['Date'],
                      header=0, index_col=0)  # 282개
-series.asfreq(freq='D')
-series.DatetimeIndex(index, freq='')
-print(series.index.freq)
+
 # result = seasonal_decompose(series, model='add')
 # result.plot()
 # plt.show()
