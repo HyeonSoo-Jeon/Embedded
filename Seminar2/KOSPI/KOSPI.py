@@ -17,6 +17,16 @@ warnings.filterwarnings("ignore")
 series = pd.read_csv('./Seminar2/KOSPI/KOSPI.csv',
                      header=0, index_col=0)  # 282개
 
-# result = seasonal_decompose(series, model='add')
-# result.plot()
-# plt.show()
+# opt = auto_arima(series[:11000], seasonal=False,
+#                  trace=True, d=2, information_criterion='bic')
+model = ARIMA(series[:11000], order=(0, 2, 2))
+model_fit = model.fit()
+
+series.plot()
+model_fit.predict(start=2, end=12965).plot(label='ARIMA(0, 2, 2)')
+
+plt.axvline(x=11000, color='gray', linestyle='--')
+plt.title('Daily KOSPI closing price (75.01.04 ~ 23.01.04)')
+plt.xticks(rotation=45)
+plt.legend()
+plt.show()
