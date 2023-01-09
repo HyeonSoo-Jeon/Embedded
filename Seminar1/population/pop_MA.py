@@ -6,23 +6,26 @@ from statsmodels.tsa.arima.model import ARIMA
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+from pmdarima import auto_arima
+
 
 series = pd.read_csv('./Seminar1/population/uspop.csv',
                      header=0, index_col=0)  # 142개
 
-
-model1 = ARIMA(series, order=(0, 0, 1))
+# opt = auto_arima(series, seasonal=False, trace=True,
+#                  information_criterion='bic')
+model1 = ARIMA(series[:120], order=(2, 0, 0))
 model_fit1 = model1.fit()
-model2 = ARIMA(series, order=(0, 0, 2))
+model2 = ARIMA(series[:120], order=(0, 0, 2))
 model_fit2 = model2.fit()
-model3 = ARIMA(series, order=(0, 0, 9))
+model3 = ARIMA(series[:120], order=(2, 1, 0))
 model_fit3 = model3.fit()
 
 
 series.plot()
-model_fit1.predict().plot(label="MA(1) Predictions")
-model_fit2.predict().plot(label="MA(2) Predictions")
-model_fit3.predict().plot(label="Optima MR Predictions by AIC, BIC, HQIC")
+model_fit1.predict(start=5, end=142).plot(label="AR(2) Predictions")
+model_fit2.predict(start=5, end=142).plot(label="MA(2) Predictions")
+model_fit3.predict(start=5, end=142).plot(label="ARIMA(2, 1, 0)")
 plt.legend()
 plt.show()
 
