@@ -1,58 +1,322 @@
-# Forecasting at Scale (대규모 예측, 2018)
+# Prophet
+
+fbprophet에서 package 명이 prophet으로 바뀜
+python 3.11에서 작동하지 않아, 3.7로 버전다운시키고 사용
+
+pip install prophet후 plotly를 재설치 해야함
+
+
+ds와 y의 column을 가져야 한다.
+ds의 경우 yyyy-mm-dd (hh:mm:ss)형식을 맞추는 것이 좋음
+
+
+``` python
+m = Prophet()
+m.add_country_holidays(country_name='KR')
+m.fit(df)
+```
+Prophet Parameter
+- seasonality_mode='multiplicative' : 곱셈 계절성
+- holidays_prior_scale=0.05 : 휴일 계절성(default = 10)
 
 <br>
 
-## 순서
-    1 소개, Introduction
+## 너무 극단적인 값
 
-    2 비즈니스 시계열의 특징, Features of Business Time Series
+<br>
+값이 너무 극단적인 경우 NA값으로 만들어 학습에서 반영시키지 않는다.
 
-    3 Prophet 예측 모델, The Prophet Forecasting Model
-        3.1  추세 모델, The Trend Model
-            3.1.1 비선형, 포화성장, Nonlinear, Saturating Growth
-            3.1.2 변화점이 있는 선형 추세, Linear Trend with Changepoints
-            3.1.3 자동 변경점 선택, Automatic Changepoint Selection
-            3.1.4 추세 예측 불확실성, Trend Forecast Uncertainty
-        3.2 계절성, Seasonality
-        3.3 휴일 및 이벤트, Holidays and Events
-        3.4 모델 피팅, Model Fitting
-        3.5 루프 내 분석 모델링, Analyst-in-the-Loop Modeling
+```python
+df.loc[(df['ds'] > '2015-06-01') & (df['ds'] < '2015-06-30'), 'y'] = None
+m = Prophet().fit(df)
+fig = m.plot(m.predict(future))
+```
+<br>
 
-    4 예측 평가 자동화, Automating Evaluation of Forecasts
-        4.1 기본 예측의 활용, Use of Baseline Forecasts
-        4.2 예측 정확도 모델링, Modeling Forecast Accuracy
-        4.3 모의 과거 예측, Simulated Historical Forecasts
-        4.4 대규모 예측 오류 파악, Identifying Large Forecast Errors
+## Logistic 성장 모형
+<br>
 
-    5 결론, Conclusion
+```python
+df['cap']=8.5
+m=Prophet(growth='logistic')
 
+# 미래 예측
+future = m.make_future_dataframe(periods=1826)
+future['cap'] = 8.5
+fcst = m.predict(future)
+fig = m.plot(fcst)
+```
 
-## Abstract
+역으로 뒤집기
 
-예측은 수용 계획, 목표 설정 및 이상 탐지를 지원하는 일반적인 데이터 과학 작업이다. 그 중요성에도 불구하고, 신뢰할 수 있고 고품질의 예측을 생성하는 것에는 심각한 문제가 있다. 특히 시계열이 다양하고 시계열 모델링에 전문 지식을 가진 분석가가 상대적으로 드문 경우에는 더욱 그렇다. 이러한 과제를 해결하기 위해, 우리는 구성 가능한 모델과 analyst-in-the-loop 성능 분석을 결합하는 "척도에 맞는" 예측에 대한 실용적인 접근 방식을 설명한다. 우리는 시계열에 대한 도메인 지식을 가진 분석가가 직관적으로 조정할 수 있는 해석 가능한 매개 변수를 가진 모듈식 회귀 모델을 제안한다. 우리는 예측 절차를 비교하고 평가하기 위해 성능 분석을 설명하고 수동 검토 및 조정을 위해 자동으로 예측에 플래그를 지정한다. 분석가가 자신의 전문 지식을 가장 효과적으로 사용할 수 있도록 지원하는 도구를 사용하면 비즈니스 시계열을 신뢰할 수 있고 실질적으로 예측할 수 있다.
+``` python
+df['y'] = 10 - df['y']
+df['cap'] = 6
+df['floor'] = 1.5
+future['cap'] = 6
+future['floor'] = 1.5
+m = Prophet(growth='logistic')
+m.fit(df)
+fcst = m.predict(future)
+fig = m.plot(fcst)
+```
+<br>
 
+## Holidays 추가
 
-## Introduction
+<br>
+휴일의 정보를 가진 데이터프레임 
 
-예측은 조직 내 많은 활동의 중심이 되는 데이터 과학 작업이다. 예를 들어, 산업의 모든 부문에 걸쳐 조직은 부족한 자원을 효율적으로 할당하기 위해 용량 계획에 참여해야 하며, 목표 설정을 기준과 비교하여 성능을 측정해야 합니다. 고품질 예측을 작성하는 것은 기계나 대부분의 분석가에게 쉬운 문제가 아닙니다. 우리는 사업 예측을 작성하는 관행에서 두 가지 주요 주제를 관찰했다. 첫째, 완전 자동 예측 기법은 조정하기 어려울 수 있으며 유용한 가정이나 경험적 접근을 통합하기에는 너무 융통성이 없는 경우가 많다. 둘째, 조직 전체에서 데이터 과학 작업을 담당하는 분석가는 일반적으로 지원하는 특정 제품 또는 서비스에 대해 깊은 도메인 전문 지식을 가지고 있지만 종종 시계열 예측에 대한 교육을 받지 못한다. 따라서 예측은 상당한 경험을 필요로 하는 전문 기술이기 때문에 고품질 예측을 할 수 있는 분석가는 매우 드물다.
-
-결과적으로 고품질 예측에 대한 수요는 종종 투입될 수 있는 속도를 훨씬 능가한다. 이러한 관찰은 우리가 여기서 제시하는 연구의 동기입니다. 우리는 규모에 따른 예측을 생성하기 위한 몇 가지 유용한 지침을 제공하고자 합니다.
-
-우리가 다루는 첫 번째 두 가지 유형의 규머는 사업 예측 방법이 (1) 시계열 방법에 대한 교육을 받지 않은 많은 수의 사람들에게 적합해야 한다는 것과 (2) 잠재적으로 특이한 기능을 가진 다양한 예측 문제에 적합해야 한다는 것이다. 섹션 3에서는 광범위한 비즈니스 시계열에 충분히 유연하지고 데이터 생성 프로세스에 대한 도메인 지식은 있지만 시계열 모델 및 방법에 대한 지식은 거의 없는 비전문가가 구성할 수 있는 시계열 모델을 제시한다.
-
-우리가 다루는 규모의 세 번째 유형은 가장 현실적인 설정에서 많은 수의 예측이 생성되어 이를 평가하고 비교하는 효율적이고 자동화된 수단이 필요하며 성능이 저하될 가능성이 있는 시기를 감지해야 한다는 것이다. 수백 또는 수천 개의 예측이 이루어질 때, 성능 문제를 해결하기 위해 인간의 피드백을 효율적으로 사용하면서 모델 평가와 비교라는 힘든 작업을 기계가 수행하도록 하는 것이 중요해진다. 섹션 4에서는 시뮬레이션된 과거 예측을 사용하여 샘플 외 성능을 추정하고 인간 분석가가 무엇이 잘못되었는지 이해하고 필요한 모델 조정을 할 수 있도록 문제가 있는 예측을 식별하는 예측 평가 시스템을 설명한다.
-
-우리가 규모의 전형적인 고려사항인 계산과 저장에 초점을 맞추고 있지 않다는 것을 주목할 필요가 있다. 우리는 많은 시계열을 예측하는 계산 및 인프라 문제가 비교적 간단하다는 것을 발견했다. 일반적으로 이러한 적합 절차는 상당히 쉽게 병렬화되며 예측은 관계형 데이터베이스에 저장하기 어렵지 않다. 우리가 실제로 관찰한 규모의 실제 문제는 다양한 예측 문제와 일단 생성되면 많은 예측에서 신뢰를 구축함으로써 발생하는 복잡성을 포함한다.
-
-대규모의 비즈니스 예측에 대한 루프 내 분석가 접근 방식을 그림 1에 요약한다. 우리는 각 매개 변수에 대한 간단한 인간 해석을 가진 유연한 사양을 사용하여 시계열을 모델링하는 것으로 시작한다. 그런 다음 다양한 역사적 시뮬레이션 예측 날짜에 걸쳐 이 모델에 대한 예측과 일련의 합리적인 기준선을 생성하고 예측 성능을 평가한다. 성능이 나쁘거나 예측의 다른 측면이 인간의 개입을 정당화할 때, 우리는 이러한 잠재적인 문제를 우선순위에 따라 인간 분석가에게 표시한다. 그런 다음 분석가는 예측을 검사하고 잠재적으로 이 피드백을 기반으로 모형을 조정할 수 있습니다.
-
-analyst-in-the-loop : 예측의 시각적 검사 + 모델링<br>
-automated : 예측 평가 + 문제 드러내기
+* lower_window : 전날에도 영향을 미치는가, 음수 ex) -1 : 하루 전까지 영향
+* upper_window : 다음날에도 영향을 미치는가, 양수
+* ds_upper : ds~ds_upper까지, 'yyyy-mm-dd'
 
 <br>
 
-## 비즈니스 시계열의 특징, Features of Business Time Series
+``` python
+holidays = pd.DataFrame({
+    'holiday' : 'name',
+    'ds' : pd.to_datetime(['2020-01-13', '2020-01-24',
+                           '2021-01-13', '2021-01-24']),
+    'lower_window' : 0,
+    'upper_window' : 1,
+})
 
-비즈니스 예측 문제는 매우 다양하지만 많은 공통적인 기능이 있다. 그림 2는 Facebook 이벤트의 대표적인 Facebook 시계열을 보여준다. Facebook 사용자는 이벤트 플랫폼을 사용하여 이벤트 페이지를 만들고, 다른 사용자를 초대하며, 다양한 방식으로 이벤트와 상호 작용할 수 있다. 그림 2는 Facebook에서 생성된 이벤트 수에 대한 일일 데이터를 보여준다. 이 시계열에는 주간 및 연간 주기, 크리스마스와 새해를 전후한 뚜렷한 하락 등 몇 가지 계절적 효과가 분명히 보인다. 이러한 유형의 계절 효과는 자연스럽게 발생하며 인간의 행동에 의해 생성된 시계열에서 기대할 수 있다. 시계열은 또한 지난 6개월 동안의 추세 변화가 뚜렷하며, 이는 신제품이나 시장 변화의 영향을 받는 시계열에서 발생할 수 있습니다. 마지막으로, 실제 데이터 세트는 종종 특이치를 가지며 이 시계열도 예외가 아니다.
+m = Prophet(holidays = holidays)
+m.add_country_holidays(country_name='KR')
+```
 
-이 시계열은 완전히 자동화된 방법으로 합리적인 예측을 생성하는 데 있어 어려움을 유용하게 설명한다. 그림 3은 Hyndman 등에 설명된 R의 예측 패키지에서 몇 가지 자동화된 절차를 사용한 예측을 보여준다. (2007). 역사의 세 지점에서 예측이 이루어졌으며, 각 지점은 해당 시점까지의 시계열 부분만을 사용하여 해당 날짜에 예측을 시뮬레이션했습니다. 그림의 방법은 다양한 ARIMA 모델에 적합하고 최적의 모델을 자동으로 선택하는 auto.arima, 지수 평활 모델 집합에 적합하고 최적의 모델을 선택하는 ets(Hyndman 등 2002), 주간 계절성(계절적 순진)으로 일정한 예측을 하는 랜덤 워크 모델인 스네이브, TBATS 모델인 TBATS 모델이다 주간 및 연간 계절(De Livera, Hyndman, Snyder 2011)과 함께.
+여러 holidays
+
+``` python
+lockdowns = pd.DataFrame([
+    {'holiday': 'lockdown_1', 'ds': '2020-03-21', 'lower_window': 0, 'ds_upper': '2020-06-06'},
+    {'holiday': 'lockdown_2', 'ds': '2020-07-09', 'lower_window': 0, 'ds_upper': '2020-10-27'},
+    {'holiday': 'lockdown_3', 'ds': '2021-02-13', 'lower_window': 0, 'ds_upper': '2021-02-17'},
+    {'holiday': 'lockdown_4', 'ds': '2021-05-28', 'lower_window': 0, 'ds_upper': '2021-06-10'},
+])
+for t_col in ['ds', 'ds_upper']:
+    lockdowns[t_col] = pd.to_datetime(lockdowns[t_col])
+lockdowns['upper_window'] = (lockdowns['ds_upper'] - lockdowns['ds']).dt.days
+```
+
+pandas.concat함수로 동일한 DataFrame을 합칠 수 있음
+
+```python
+playoffs = pd.DataFrame({
+  'holiday': 'playoff',
+  'ds': pd.to_datetime(['2008-01-13', '2009-01-03', '2010-01-16',
+                        '2010-01-24', '2010-02-07', '2011-01-08',
+                        '2013-01-12', '2014-01-12', '2014-01-19',
+                        '2014-02-02', '2015-01-11', '2016-01-17',
+                        '2016-01-24', '2016-02-07']),
+  'lower_window': 0,
+  'upper_window': 1,
+})
+superbowls = pd.DataFrame({
+  'holiday': 'superbowl',
+  'ds': pd.to_datetime(['2010-02-07', '2014-02-02', '2016-02-07']),
+  'lower_window': 0,
+  'upper_window': 1,
+})
+holidays = pd.concat((playoffs, superbowls))
+```
+### 국가 목록
+---
+
+Brazil (BR), Indonesia (ID), India (IN), Malaysia (MY), Vietnam (VN), Thailand (TH), Philippines (PH), Pakistan (PK), Bangladesh (BD), Egypt (EG), China (CN), and Russian (RU), Korea (KR), Belarus (BY), and United Arab Emirates (AE)
+
+---
+
+적용된 휴일 목록 확인
+
+``` python
+m.train_holiday_names
+```
+휴일 효과 확인
+```python
+forecast[(forecast['playoff'] + forecast['superbowl']).abs() > 0][
+        ['ds', 'playoff', 'superbowl']][-10:]
+```
+<br>
+
+## 계절성 푸리에 차수
+
+기본 푸리에 차수는 10이다. 주로 적절하지만 더 높은 빈도의 변화에 바꿀 필요가 있다. 하지만 과적합으로 이어질 수 있다. 2N변수이다.
+
+```python
+from prophet.plot import plot_yearly
+m = Prophet(yearly_seasonality=20).fit(df)
+a = plot_yearly(m)
+```
+
+주간 계절성에 대해 푸리에 차수3을 사용하고 연간 계절성에 대해 10을 사용한다.
+주간 계절성을 월간 계절성으로 바꾸기
+
+```python
+m = Prophet(weekly_seasonality=False)
+m.add_seasonality(name='monthly', period=30.5, fourier_order=5)
+forecast = m.fit(df).predict(future)
+fig = m.plot_components(forecast)
+```
+<br>
+
+## 성수기 비성수기 구분하기
+<br>
+
+```python
+def is_nfl_season(ds):
+    date = pd.to_datetime(ds)
+    return (date.month > 8 or date.month < 2)
+
+df['on_season'] = df['ds'].apply(is_nfl_season)
+df['off_season'] = ~df['ds'].apply(is_nfl_season)
+
+m = Prophet(weekly_seasonality=False)
+m.add_seasonality(name='weekly_on_season', period=7, fourier_order=3, condition_name='on_season')
+m.add_seasonality(name='weekly_off_season', period=7, fourier_order=3, condition_name='off_season')
+
+future['on_season'] = future['ds'].apply(is_nfl_season)
+future['off_season'] = ~future['ds'].apply(is_nfl_season)
+forecast = m.fit(df).predict(future)
+fig = m.plot_components(forecast)
+```
+<br>
+
+## 예측하기
+<br>
+예측을 어디까지 진행할 것인지 기간을 정한다.
+
+<br>
+
+``` python
+future = m.make_future_dataframe(periods=365)
+future.tail()
+```
+
+make_future_dataframe을 이용해서 쉽게 만들 수 있다. periods에 원하는 기간을 넣어서 생성하면 된다.
+
+predict를 이용해서 예측하면 되는데, forecast에 많은 정보가 들어간다.
+
+``` python
+forecase = m.predict(future)
+forecast[['ds', 'yhat','yhat_lower', 'yhat_upper']].tail()
+
+```
+
+예측 데이터
+```python
+m.plot(forecast)
+```
+구성 요소
+```python
+m.plot_components(forecast)
+```
+
+대화형 그림
+
+```python
+from prophet.plot import plot_plotly, plot_components_plotly
+
+plot_plotly(m, forecast)
+plot_components_plotly(m, forecast)
+```
+<br>
+
+## ChangePoint 감지
+<br>
+
+```python
+
+from prophet.plot import add_changepoints_to_plot
+fig = m.plot(forecast)
+a = add_changepoints_to_plot(fig.gca(), m, forecast)
+
+```
+
+### 추세의 유연성 조절
+
+추세 변화가 과적합(유연성이 너무 높음) 또는 과소적합(유연성이 충분하지 않음)인 경우 입력 인수를 사용하기 전에 희소 강도를 조정할 수 있습니다. (changepoint_prior_scale) 기본적으로 이 매개변수는 0.05로 설정됩니다.
+
+```python
+
+# 추세 유연성 향상
+m = Prophet(changepoint_prior_scale=0.5)
+forecast = m.fit(df).predict(future)
+fig = m.plot(forecast)
+
+# 추세 유연성 감소
+m = Prophet(changepoint_prior_scale=0.001)
+forecast = m.fit(df).predict(future)
+fig = m.plot(forecast)
+
+```
+<br>
+
+## Changepoint 조정
+<br>
+
+```python
+m = Prophet(changepoints=['2014-01-01'])
+forecast = m.fit(df).predict(future)
+fig = m.plot(forecast)
+```
+
+<br>
+
+## 모델 저장
+<br>
+
+```python
+from prophet.serialize import model_to_json, model_from_json
+
+with open('serialized_model.json', 'w') as fout:
+    fout.write(model_to_json(m))  # Save model
+
+with open('serialized_model.json', 'r') as fin:
+    m = model_from_json(fin.read())  # Load model
+```
+<Br>
+
+## 적합 모델 업데이트
+<Br>
+
+
+```python
+# Python
+def warm_start_params(m):
+    """
+    Retrieve parameters from a trained model in the format used to initialize a new Stan model.
+    Note that the new Stan model must have these same settings:
+        n_changepoints, seasonality features, mcmc sampling
+    for the retrieved parameters to be valid for the new model.
+
+    Parameters
+    ----------
+    m: A trained model of the Prophet class.
+
+    Returns
+    -------
+    A Dictionary containing retrieved parameters of m.
+    """
+    res = {}
+    for pname in ['k', 'm', 'sigma_obs']:
+        if m.mcmc_samples == 0:
+            res[pname] = m.params[pname][0][0]
+        else:
+            res[pname] = np.mean(m.params[pname])
+    for pname in ['delta', 'beta']:
+        if m.mcmc_samples == 0:
+            res[pname] = m.params[pname][0]
+        else:
+            res[pname] = np.mean(m.params[pname], axis=0)
+    return res
+
+df = pd.read_csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_peyton_manning.csv')
+df1 = df.loc[df['ds'] < '2016-01-19', :]  # All data except the last day
+m1 = Prophet().fit(df1) # A model fit to all data except the last day
+
+
+%timeit m2 = Prophet().fit(df)  # Adding the last day, fitting from scratch
+%timeit m2 = Prophet().fit(df, init=warm_start_params(m1))  # Adding the last day, warm-starting from m1
+```
