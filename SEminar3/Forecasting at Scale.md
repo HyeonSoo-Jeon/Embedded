@@ -18,6 +18,7 @@ m.fit(df)
 Prophet Parameter
 - seasonality_mode='multiplicative' : 곱셈 계절성
 - holidays_prior_scale=0.05 : 휴일 계절성(default = 10)
+- growth='flat' : 일정한 추세 성장률
 
 <br>
 
