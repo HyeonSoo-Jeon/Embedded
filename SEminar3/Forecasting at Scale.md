@@ -284,7 +284,6 @@ with open('serialized_model.json', 'r') as fin:
 
 
 ```python
-# Python
 def warm_start_params(m):
     """
     Retrieve parameters from a trained model in the format used to initialize a new Stan model.

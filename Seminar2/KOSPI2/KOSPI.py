@@ -17,7 +17,7 @@ warnings.filterwarnings("ignore")
 series = pd.read_csv('./Seminar2/KOSPI2/KOSPI.csv',
                      parse_dates=['Date'],
                      header=0, index_col=0)
-
-seasonal_result = seasonal_decompose(series)
-seasonal_result.plot()
-plt.show()
+print(len(series))
+# seasonal_result = seasonal_decompose(series)
+# seasonal_result.plot()
+# plt.show()
