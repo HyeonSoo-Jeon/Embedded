@@ -200,7 +200,7 @@ make_future_dataframe을 이용해서 쉽게 만들 수 있다. periods에 원�
 predict를 이용해서 예측하면 되는데, forecast에 많은 정보가 들어간다.
 
 ``` python
-forecase = m.predict(future)
+forecast = m.predict(future)
 forecast[['ds', 'yhat','yhat_lower', 'yhat_upper']].tail()
 
 ```
@@ -320,3 +320,14 @@ m1 = Prophet().fit(df1) # A model fit to all data except the last day
 %timeit m2 = Prophet().fit(df)  # Adding the last day, fitting from scratch
 %timeit m2 = Prophet().fit(df, init=warm_start_params(m1))  # Adding the last day, warm-starting from m1
 ```
+<br><br>
+
+## 회기변수 추가
+<br>
+
+add_regressor( )
+
+- binary data뿐 아니라 시계열 데이터도 가능
+- regressor가 target보다 예측하기 더 쉬워야함
+- add_regressor에 사용되어지는 변수는 과거 미래 데이터도 포함되어야 함
+- regressor와 target과의 coefficient 측정 가능(regressor_coefficients)

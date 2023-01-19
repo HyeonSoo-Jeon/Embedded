@@ -1,30 +1,52 @@
-# Random Dataset Preparation
-import pandas
-import numpy
+# Python
+import numpy as np
+import pandas as pd
 from prophet import Prophet
-import random
-random.seed(a=1)
+import time
 
-df = pandas.DataFrame(data=None, columns=['ds', 'y', 'ex'], index=range(50))
-datelist = pandas.date_range(pandas.datetime.today(), periods=50).tolist()
 
-y = numpy.random.normal(0, 1, 50)
-ex = numpy.random.normal(0, 2, 50)
+def warm_start_params(m):
+    """
+    Retrieve parameters from a trained model in the format used to initialize a new Stan model.
+    Note that the new Stan model must have these same settings:
+        n_changepoints, seasonality features, mcmc sampling
+    for the retrieved parameters to be valid for the new model.
 
-df['ds'] = datelist
-df['y'] = y
-df['ex'] = ex
+    Parameters
+    ----------
+    m: A trained model of the Prophet class.
 
-# Model
-prophet_model = Prophet(seasonality_prior_scale=0.1)
-Prophet.add_regressor(prophet_model, 'ex')
-prophet_model.fit(df)
-prophet_forecast_step = prophet_model.make_future_dataframe(periods=1)
+    Returns
+    -------
+    A Dictionary containing retrieved parameters of m.
+    """
+    res = {}
+    for pname in ['k', 'm', 'sigma_obs']:
+        if m.mcmc_samples == 0:
+            res[pname] = m.params[pname][0][0]
+        else:
+            res[pname] = np.mean(m.params[pname])
+    for pname in ['delta', 'beta']:
+        if m.mcmc_samples == 0:
+            res[pname] = m.params[pname][0]
+        else:
+            res[pname] = np.mean(m.params[pname], axis=0)
+    return res
 
-# Result-df
-prophet_x_df = pandas.DataFrame(
-    data=None, columns=['Date_x', 'Res'], index=range(int(len(y))))
 
-# Error
-prophet_x_df.iloc[0, 1] = prophet_model.predict(
-    prophet_forecast_step).iloc[0, 0]
+df = pd.read_csv(
+    'https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_peyton_manning.csv')
+df1 = df.loc[df['ds'] < '2016-01-19', :]  # All data except the last day
+m1 = Prophet().fit(df1)  # A model fit to all data except the last day
+
+
+# Adding the last day, fitting from scratch
+s = time.time()
+m2 = Prophet().fit(df)
+e = time.time()
+print(e-s)
+# Adding the last day, warm-starting from m1
+s = time.time()
+m2 = Prophet().fit(df, init=warm_start_params(m1))
+e = time.time()
+print(e-s)
