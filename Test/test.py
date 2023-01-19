@@ -1,36 +1,30 @@
-from itertools import product
-
+# Random Dataset Preparation
+import pandas
+import numpy
 from prophet import Prophet
+import random
+random.seed(a=1)
 
-m = Prophet()
+df = pandas.DataFrame(data=None, columns=['ds', 'y', 'ex'], index=range(50))
+datelist = pandas.date_range(pandas.datetime.today(), periods=50).tolist()
 
-param_grid = {
-    'model': [m], 'initial': ['730 days', '500 days'], 'period': ['180 days'], 'horizon': ['365 days']
-}
+y = numpy.random.normal(0, 1, 50)
+ex = numpy.random.normal(0, 2, 50)
 
+df['ds'] = datelist
+df['y'] = y
+df['ex'] = ex
 
-def create_grid(param_grid):
+# Model
+prophet_model = Prophet(seasonality_prior_scale=0.1)
+Prophet.add_regressor(prophet_model, 'ex')
+prophet_model.fit(df)
+prophet_forecast_step = prophet_model.make_future_dataframe(periods=1)
 
-    param_grid_list = [param_grid].copy()
+# Result-df
+prophet_x_df = pandas.DataFrame(
+    data=None, columns=['Date_x', 'Res'], index=range(int(len(y))))
 
-    for p in param_grid_list:
-        # Always sort the keys of a dictionary, for reproducibility
-        items = sorted(p.items())
-        if not items:
-            yield {}
-        else:
-            keys, values = zip(*items)
-            for v in product(*values):
-                params = dict(zip(keys, v))
-                yield params
-
-
->> > list(create_grid(param_grid))
-    [{'model': < fbprophet.forecaster.Prophet at 0x11cd0bba8 > ,
-      'initial': '730 days',
-      'period': '180 days',
-      'horizon': '365 days'},
-     {'model': < fbprophet.forecaster.Prophet at 0x11cd0bba8 > ,
-      'initial': '500 days',
-      'period': '180 days',
-      'horizon': '365 days'}]
+# Error
+prophet_x_df.iloc[0, 1] = prophet_model.predict(
+    prophet_forecast_step).iloc[0, 0]
